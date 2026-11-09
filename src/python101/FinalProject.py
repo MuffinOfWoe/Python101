@@ -3,10 +3,6 @@ import requests
 import os
 import sys
 
-# TODO: Change structure so task order is keys, and a nested dict or object contains all the data... so we can modify a task!
-# Create modify task function
-# DONE Create dispatch pattern to avoid elif... anti-pattern
-
 RED = '\033[31m'
 GREEN = '\033[32m'
 YELLOW = '\033[33m'
@@ -69,7 +65,7 @@ def call_api():
     \t\t{BOLD}Status: {RESET} {response["fields"]["status"]["name"]}
     """)
 
-# Dispatch pattern for main menu gets around lots of elif statements.
+# Dispatch pattern for main menu.
 MENU_DISPATCH= {
     1: [add_tasks,"Add a new task"],
     2: [complete_task, "Complete a task"],
@@ -99,6 +95,8 @@ while True:
         print("You must enter an integer from the menu options. Try again!")
         continue
 
+
+# Removed in favor of dispatch pattern.
 
 # menu_selection = 0
 # menu_redisplay = 0
