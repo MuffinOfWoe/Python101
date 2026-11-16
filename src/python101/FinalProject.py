@@ -1,4 +1,3 @@
-import subprocess
 import requests
 import os
 import sys
@@ -42,19 +41,20 @@ def filter_tasks():
     print()
     for task,status in users_tasks.items():
         if status == "Completed":
-            print(f"\t{GREEN}Completed:\t {task}{GREEN}")
+            print(f"\t{GREEN}Completed:\t {task}{RESET}")
         else:
-            print(f"\t{YELLOW}Need Attention:\t {task}{YELLOW}")
+            print(f"\t{YELLOW}Need Attention:\t {task}{RESET}")
 
 def exit_app():
     print("Good Bye!")
     sys.exit()
 
+JIRA_API_KEY = os.getenv("UX_CLASS_JIRA_KEY")
+
 def call_api():
     url = "https://evergreen-team-n77j0qa2.atlassian.net/rest/api/3/issue/KAN-6"
-    API_KEY = os.getenv("UX_CLASS_JIRA_KEY")
     email = "jnzz5505@evergreen.edu"
-    response = requests.get(url,auth=(email,API_KEY))
+    response = requests.get(url,auth=(email,JIRA_API_KEY))
     response = response.json()
 
     print(f"""
@@ -73,7 +73,7 @@ MENU_DISPATCH= {
     4: [delete_task, "Delete a task"],
     5: [filter_tasks, "View tasks by status"],
     6: [exit_app, "Exit"],
-    7: [call_api, "View my Jira Task"]
+    7: [call_api, f"{'View my Jira Task' if JIRA_API_KEY else 'API Key is missing, You can\'t view my Jira Task!'}"]
     }
 
 def display_menu(menu):
@@ -83,7 +83,7 @@ def display_menu(menu):
 def main_menu(menu_selection):
     MENU_DISPATCH[menu_selection][0]()
 
-subprocess.run("clear") # if on Windows, change from clear to cls
+os.system("cls" if os.name == "nt" else "clear")
 
 print(f"{BLUE}Welcome to the task Manager.\n{RESET}")
 display_menu(MENU_DISPATCH)
