@@ -1,7 +1,9 @@
-import subprocess
 import requests
 import os
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 RED = '\033[31m'
 GREEN = '\033[32m'
@@ -50,13 +52,14 @@ def exit_app():
     print("Good Bye!")
     sys.exit()
 
+# JIRA_API_KEY = os.getenv("UX_CLASS_JIRA_KEY")
+JIRA_API_KEY = os.getenv("JIRA")
+
 def call_api():
     url = "https://evergreen-team-n77j0qa2.atlassian.net/rest/api/3/issue/KAN-6"
-    API_KEY = os.getenv("UX_CLASS_JIRA_KEY")
     email = "jnzz5505@evergreen.edu"
-    response = requests.get(url,auth=(email,API_KEY))
+    response = requests.get(url,auth=(email,JIRA_API_KEY))
     response = response.json()
-
     print(f"""
     \tYou have retrieved a Jira Task with the following information\n
     \t\t{BOLD}Project: {RESET} {response["fields"]["project"]["name"]}
@@ -66,14 +69,14 @@ def call_api():
     """)
 
 # Dispatch pattern for main menu.
-MENU_DISPATCH= {
+MENU_DISPATCH = {
     1: [add_tasks,"Add a new task"],
     2: [complete_task, "Complete a task"],
     3: [view_tasks, "View all tasks."],
     4: [delete_task, "Delete a task"],
     5: [filter_tasks, "View tasks by status"],
     6: [exit_app, "Exit"],
-    7: [call_api, "View my Jira Task"]
+    7: [call_api, f"{'View my Jira Task' if JIRA_API_KEY else 'API Key is missing, You can\'t view my Jira Task!'}"]
     }
 
 def display_menu(menu):
@@ -83,7 +86,7 @@ def display_menu(menu):
 def main_menu(menu_selection):
     MENU_DISPATCH[menu_selection][0]()
 
-subprocess.run("clear") # if on Windows, change from clear to cls
+os.system("cls" if os.name == "nt" else "clear")
 
 print(f"{BLUE}Welcome to the task Manager.\n{RESET}")
 display_menu(MENU_DISPATCH)
@@ -94,6 +97,42 @@ while True:
     except Exception:
         print("You must enter an integer from the menu options. Try again!")
         continue
+
+
+# SupaBase refactor for persistent data
+
+supabase_api_key = "sb_publishable_IDd6uV8uzhOlbK3p94DoNw_4ePJkiZ5"
+supabase_url = "https://eyjofdmiyocyeksjixoy.supabase.co/rest/v1/TaskList"
+
+params = {"select":"*"}
+headers = {"apikey": supabase_api_key,
+    "Authorization": f"Bearer {supabase_api_key}"}
+
+# r = requests.get(supabase_url,params=params,headers=headers)
+# print(r.json())
+
+# r = json.dumps(r.json(),indent=4)
+# print(r)
+
+# payload = {
+#     "task_name": "Do a thing...",
+#     "task_status": "New Task"
+# }
+
+# r = requests.post(supabase_url,json=payload,headers=headers)
+# print(r)
+
+def view_supabase_tasks():
+    response = requests.get(supabase_url,params=params,headers=headers)
+    response = response.json()
+    task_name = response[0]["task_name"]
+    task_status = response[0]["task_status"]
+    id = response[0]["id"]
+    return id, task_name, task_status
+
+
+print(view_supabase_tasks())
+
 
 
 # Removed in favor of dispatch pattern.
